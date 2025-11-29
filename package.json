@@ -14,7 +14,7 @@
     "dracula-theme",
     "password-protection"
   ],
-  "author": "XGR Solutions",
+  "author": "Xavier Gregor",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
