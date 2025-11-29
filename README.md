@@ -162,7 +162,7 @@ const upload = multer({
 ```javascript
 const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2 GB - Modifiez cette valeur
 ```
-**Ajouter ceci à Nginx Proxy Manager:**
+**Allez dans l'onglet "Advanced" de Nginx Proxy Manager et ajoutez ce code ::**
 ```
 # Augmenter la limite de taille pour 5 Go
 client_max_body_size 6G;
