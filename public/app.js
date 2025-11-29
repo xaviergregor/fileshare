@@ -1,6 +1,6 @@
 // Configuration
 const API_URL = '/api';
-const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2 GB
+const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5 GB
 
 // État de l'application
 let selectedFiles = [];
