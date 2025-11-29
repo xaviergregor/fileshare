@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![XGR FileShare Banner](https://img.shields.io/badge/XGR-FileShare-bd93f9?style=for-the-badge&logo=files&logoColor=white)
+![FileShare Banner](https://img.shields.io/badge/XGR-FileShare-bd93f9?style=for-the-badge&logo=files&logoColor=white)
 
 **Système de partage de fichiers sécurisé**
 
@@ -392,7 +392,7 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 👨‍💻 Auteur
 
-**XGR Solutions**  
+**Xavier Gregor**  
 
 Spécialiste en solutions IT et infrastructures
 
