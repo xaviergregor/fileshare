@@ -1,0 +1,503 @@
+# 🚀 FileShare
+
+<div align="center">
+
+![XGR FileShare Banner](https://img.shields.io/badge/XGR-FileShare-bd93f9?style=for-the-badge&logo=files&logoColor=white)
+
+**Système de partage de fichiers sécurisé**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Theme](https://img.shields.io/badge/Theme-Dracula-bd93f9)](https://draculatheme.com/)
+
+[Fonctionnalités](#-fonctionnalités) • [Installation](#-installation) • [Utilisation](#-utilisation) • [Configuration](#️-configuration) • [Déploiement](#-déploiement)
+
+</div>
+
+---
+
+## 📋 Description
+
+FileShare est une application web moderne de partage de fichiers inspirée de WeTransfer et Firefox Send. Elle permet de partager des fichiers volumineux de manière simple, sécurisée et élégante avec un magnifique thème Dracula.
+
+### ✨ Points forts
+
+- 🎨 **Interface élégante** avec le thème Dracula
+- 🔒 **Sécurité renforcée** avec protection par mot de passe
+- 📦 **Fichiers volumineux** jusqu'à 2 Go par fichier
+- ⏱️ **Expiration automatique** des liens de partage
+- 🐳 **Déploiement facile** avec Docker
+- 📱 **Design responsive** pour mobile et desktop
+- 🔐 **Chiffrement bcrypt** des mots de passe
+
+---
+
+## 🎯 Fonctionnalités
+
+### Upload de fichiers
+- ✅ Glisser-déposer intuitif
+- ✅ Sélection multiple de fichiers
+- ✅ Support de fichiers jusqu'à 2 Go
+- ✅ Barre de progression en temps réel
+- ✅ Affichage de la vitesse d'upload
+- ✅ Temps restant estimé
+
+### Sécurité
+- 🔒 **Protection par mot de passe optionnelle**
+- 🔐 Hachage bcrypt (10 rounds)
+- 🔑 ID de partage cryptographiquement sécurisés
+- ⏰ Expiration configurable (1h, 6h, 24h, 3j, 7j)
+- 📊 Limite de téléchargements
+- 🧹 Nettoyage automatique des fichiers expirés
+
+### Interface
+- 🎨 Thème Dracula complet
+- 📱 Design responsive
+- 🌍 Interface en français
+- ⚡ Performances optimisées
+- 🖱️ UX intuitive
+
+---
+
+## 🚀 Installation
+
+### Méthode 1 : Docker (Recommandée)
+
+#### Prérequis
+- Docker 20.10+
+- Docker Compose 2.0+
+
+#### Installation rapide
+
+```bash
+# Cloner le repository
+git clone https://github.com/xaviergregor/fileshare.git
+cd fileshare
+
+# Lancer avec Docker Compose
+docker compose up -d --build
+
+# Accéder à l'application
+# http://localhost:3000
+```
+
+### Méthode 2 : Installation manuelle
+
+#### Prérequis
+- Node.js 18+
+- npm 9+
+
+#### Installation
+
+```bash
+# Cloner le repository
+git clone https://github.com/votre-username/fileshare.git
+cd fileshare
+
+# Installer les dépendances
+npm install
+
+# Démarrer le serveur
+npm start
+
+# Ou en mode développement
+npm run dev
+```
+
+L'application sera accessible sur `http://localhost:3000`
+
+---
+
+## 💻 Utilisation
+
+### 1. Upload de fichiers
+
+1. Glissez-déposez vos fichiers dans la zone prévue ou cliquez pour sélectionner
+2. Configurez les options :
+   - **Durée de conservation** : 1h à 7 jours
+   - **Téléchargements max** : 1 à 50 ou illimité
+   - **Mot de passe** (optionnel) : Protégez vos fichiers
+3. Cliquez sur **"Envoyer les fichiers"**
+4. Copiez le lien de partage généré
+
+### 2. Partage de fichiers
+
+Envoyez le lien de partage à vos destinataires. Si vous avez défini un mot de passe, communiquez-leur également de manière sécurisée.
+
+### 3. Téléchargement
+
+Les destinataires :
+1. Cliquent sur le lien
+2. Entrent le mot de passe (si nécessaire)
+3. Téléchargent les fichiers
+
+---
+
+## ⚙️ Configuration
+
+### Variables d'environnement
+
+Créez un fichier `.env` à la racine du projet :
+
+```env
+PORT=3000
+NODE_ENV=production
+TZ=Europe/Paris
+```
+
+### Modifier la taille maximale des fichiers
+
+**Dans `server.js` :**
+```javascript
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 2 * 1024 * 1024 * 1024 // 2 GB - Modifiez cette valeur
+    }
+});
+```
+
+**Dans `public/app.js` :**
+```javascript
+const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2 GB - Modifiez cette valeur
+```
+
+### Changer le port
+
+**Dans `docker-compose.yml` :**
+```yaml
+ports:
+  - "8080:3000"  # Utilisez le port 8080 au lieu de 3000
+```
+
+### Configuration du nettoyage automatique
+
+Par défaut, les fichiers expirés sont nettoyés toutes les heures. Pour modifier :
+
+**Dans `server.js` :**
+```javascript
+// '0 * * * *' = toutes les heures
+// '*/30 * * * *' = toutes les 30 minutes
+// '0 0 * * *' = une fois par jour à minuit
+schedule.scheduleJob('0 * * * *', async () => {
+    // Code de nettoyage
+});
+```
+
+---
+
+## 🌐 Déploiement en production
+
+### Avec Nginx (Reverse Proxy)
+
+#### 1. Configuration Nginx
+
+Créez `/etc/nginx/sites-available/fileshare` :
+
+```nginx
+server {
+    listen 80;
+    server_name files.votredomaine.fr;
+
+    client_max_body_size 2G;
+    client_body_timeout 300s;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts pour les gros fichiers
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+    }
+}
+```
+
+#### 2. Activer le site
+
+```bash
+sudo ln -s /etc/nginx/sites-available/fileshare /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+#### 3. Ajouter SSL avec Let's Encrypt
+
+```bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d files.votredomaine.fr
+```
+
+### Configuration du pare-feu
+
+```bash
+# Ubuntu/Debian avec UFW
+sudo ufw allow 3000/tcp
+sudo ufw reload
+
+# CentOS/RHEL avec firewalld
+sudo firewall-cmd --permanent --add-port=3000/tcp
+sudo firewall-cmd --reload
+```
+
+### Systemd (sans Docker)
+
+Créez `/etc/systemd/system/fileshare.service` :
+
+```ini
+[Unit]
+Description= FileShare
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/fileshare
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Activer le service :
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable fileshare
+sudo systemctl start fileshare
+```
+
+---
+
+## 🎨 Personnalisation
+
+### Thème Dracula
+
+Le thème utilise la palette officielle Dracula :
+
+```css
+:root {
+    --background: #282a36;      /* Arrière-plan */
+    --current-line: #44475a;    /* Ligne actuelle */
+    --foreground: #f8f8f2;      /* Texte principal */
+    --comment: #6272a4;         /* Commentaires */
+    --cyan: #8be9fd;            /* Cyan */
+    --green: #50fa7b;           /* Vert */
+    --orange: #ffb86c;          /* Orange */
+    --pink: #ff79c6;            /* Rose */
+    --purple: #bd93f9;          /* Violet */
+    --red: #ff5555;             /* Rouge */
+    --yellow: #f1fa8c;          /* Jaune */
+}
+```
+
+### Modifier le logo
+
+Remplacez l'emoji dans `public/index.html` :
+
+```html
+<h1 class="header">
+    FileShare  <!-- Changez ici -->
+</h1>
+```
+
+---
+
+## 📁 Structure du projet
+
+```
+fileshare/
+├── public/                 # Fichiers statiques
+│   ├── index.html         # Interface principale
+│   └── app.js             # JavaScript client
+├── uploads/               # Fichiers uploadés (créé automatiquement)
+├── data/                  # Métadonnées JSON (créé automatiquement)
+├── server.js              # Serveur Express
+├── package.json           # Dépendances Node.js
+├── Dockerfile             # Configuration Docker
+├── docker-compose.yml     # Orchestration Docker
+├── .dockerignore         # Fichiers exclus du build Docker
+├── .gitignore            # Fichiers exclus de Git
+└── README.md             # Ce fichier
+```
+
+---
+
+## 🛠️ Technologies utilisées
+
+### Backend
+- **Node.js** 18+ - Runtime JavaScript
+- **Express** 4.x - Framework web
+- **Multer** - Gestion des uploads
+- **bcrypt** - Hachage des mots de passe
+- **node-schedule** - Tâches planifiées
+
+### Frontend
+- **HTML5** - Structure
+- **CSS3** - Styles (Dracula theme)
+- **JavaScript ES6+** - Logique client
+- **XMLHttpRequest** - Upload avec progression
+
+### DevOps
+- **Docker** - Containerisation
+- **Docker Compose** - Orchestration
+
+---
+
+## 🐛 Dépannage
+
+### Le serveur ne démarre pas
+
+```bash
+# Vérifier les logs
+docker compose logs -f
+
+# Vérifier que le port n'est pas utilisé
+sudo netstat -tlnp | grep 3000
+
+# Redémarrer le conteneur
+docker compose restart
+```
+
+### Erreur lors de l'upload
+
+**Fichier trop volumineux** :
+- Vérifiez la limite dans `server.js` et `app.js`
+- Vérifiez la configuration Nginx si utilisé
+
+**Timeout** :
+- Augmentez les timeouts dans la configuration Nginx
+- Vérifiez l'espace disque disponible
+
+### Impossible d'accéder depuis le réseau
+
+1. Vérifiez que Docker écoute sur `0.0.0.0` dans `docker-compose.yml`
+2. Vérifiez le pare-feu
+3. Testez : `curl http://VOTRE-IP:3000`
+
+### Le mot de passe ne fonctionne pas
+
+1. Vérifiez les logs : `docker compose logs -f`
+2. Reconstruisez sans cache : `docker compose build --no-cache`
+3. Vérifiez que bcrypt est installé : `npm list bcrypt`
+
+---
+
+## 🔐 Sécurité
+
+### Bonnes pratiques
+
+- ✅ Utilisez HTTPS en production (Let's Encrypt)
+- ✅ Configurez un pare-feu approprié
+- ✅ Limitez l'accès réseau au strict nécessaire
+- ✅ Gardez Node.js et les dépendances à jour
+- ✅ Utilisez des mots de passe forts pour les partages sensibles
+- ✅ Surveillez l'espace disque
+- ✅ Effectuez des sauvegardes régulières
+
+### Limitations connues
+
+- Taille maximale par fichier : 2 Go (configurable)
+- Pas d'authentification utilisateur (intentionnel)
+- Stockage local uniquement (pas de S3/cloud storage)
+
+---
+
+## 📊 Performances
+
+### Optimisations
+
+- Streaming des fichiers (pas de chargement en mémoire)
+- Nettoyage automatique des fichiers expirés
+- Compression gzip des assets statiques (via Nginx)
+- Cache des fichiers statiques
+
+### Recommandations serveur
+
+**Minimum** :
+- CPU : 1 cœur
+- RAM : 512 MB
+- Disque : 10 GB + espace pour les fichiers
+
+**Recommandé** :
+- CPU : 2+ cœurs
+- RAM : 2 GB
+- Disque : SSD avec 50+ GB
+
+---
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! 
+
+### Comment contribuer
+
+1. Forkez le projet
+2. Créez une branche (`git checkout -b feature/amelioration`)
+3. Committez vos changements (`git commit -am 'Ajout de fonctionnalité'`)
+4. Poussez vers la branche (`git push origin feature/amelioration`)
+5. Créez une Pull Request
+
+### Reporting de bugs
+
+Ouvrez une issue sur GitHub avec :
+- Description du problème
+- Étapes pour reproduire
+- Logs du serveur
+- Version de Node.js et Docker
+
+---
+
+## 📝 Changelog
+
+### Version 2.0.0 (Actuelle)
+- ✨ Ajout de la protection par mot de passe
+- 🔐 Hachage bcrypt des mots de passe
+- 🎨 Amélioration de l'interface utilisateur
+- 🐛 Corrections de bugs
+- 📚 Documentation améliorée
+
+### Version 1.0.0
+- 🎉 Version initiale
+- 📤 Upload de fichiers
+- 🔗 Génération de liens de partage
+- ⏰ Expiration automatique
+- 🎨 Thème Dracula
+
+---
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+## 👨‍💻 Auteur
+
+**XGR Solutions**  
+
+Spécialiste en solutions IT et infrastructures
+
+---
+
+<div align="center">
+
+**Made with ❤️ and the Dracula theme 🧛‍♂️**
+
+⭐ Si ce projet vous plaît, n'hésitez pas à lui donner une étoile !
+
+[⬆ Retour en haut](#-fileshare)
+
+</div>

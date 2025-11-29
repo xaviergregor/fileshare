@@ -1,0 +1,20 @@
+services:
+  fileshare:
+    build: .
+    container_name: fileshare
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:3000:3000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./data:/app/data
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - TZ=Europe/Paris
+    networks:
+      - fileshare-network
+
+networks:
+  fileshare-network:
+    driver: bridge
