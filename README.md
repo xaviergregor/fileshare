@@ -162,6 +162,24 @@ const upload = multer({
 ```javascript
 const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2 GB - Modifiez cette valeur
 ```
+**Ajouter ceci à Nginx Proxy Manager:**
+```
+# Augmenter la limite de taille pour 5 Go
+client_max_body_size 6G;
+
+# Timeouts pour les gros fichiers (30 minutes)
+client_body_timeout 1800s;
+client_header_timeout 1800s;
+proxy_connect_timeout 1800s;
+proxy_send_timeout 1800s;
+proxy_read_timeout 1800s;
+send_timeout 1800s;
+
+# Optimisations pour gros fichiers
+proxy_request_buffering off;
+proxy_buffering off;
+client_body_buffer_size 512k;
+```
 
 ### Changer le port
 
