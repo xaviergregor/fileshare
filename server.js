@@ -5,9 +5,15 @@ const fs = require('fs').promises;
 const crypto = require('crypto');
 const schedule = require('node-schedule');
 const bcrypt = require('bcrypt');
+const https = require('https');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Configuration Telegram
+const TELEGRAM_ENABLED = process.env.TELEGRAM_ENABLED === 'true';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 
 // Configuration des dossiers
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
@@ -20,6 +26,86 @@ async function initDirectories() {
         await fs.mkdir(DATA_DIR, { recursive: true });
     } catch (error) {
         console.error('Erreur lors de la création des dossiers:', error);
+    }
+}
+
+// Fonction pour envoyer une notification Telegram
+async function sendTelegramNotification(message) {
+    if (!TELEGRAM_ENABLED) {
+        return;
+    }
+    
+    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+        console.error('❌ Telegram activé mais BOT_TOKEN ou CHAT_ID manquant');
+        return;
+    }
+    
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    const data = JSON.stringify({
+        chat_id: parseInt(TELEGRAM_CHAT_ID),
+        text: message
+    });
+    
+    const contentLength = Buffer.byteLength(data, 'utf8');
+    
+    return new Promise((resolve, reject) => {
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'Content-Length': contentLength
+            }
+        };
+        
+        const req = https.request(url, options, (res) => {
+            let responseData = '';
+            res.on('data', (chunk) => {
+                responseData += chunk;
+            });
+            res.on('end', () => {
+                if (res.statusCode === 200) {
+                    console.log('✅ Notification Telegram envoyée');
+                    resolve(responseData);
+                } else {
+                    console.error('❌ Erreur Telegram:', res.statusCode, responseData);
+                    reject(new Error(`Telegram API error: ${res.statusCode}`));
+                }
+            });
+        });
+        
+        req.on('error', (error) => {
+            console.error('❌ Erreur réseau Telegram:', error.message);
+            reject(error);
+        });
+        
+        req.write(data);
+        req.end();
+    });
+}
+
+// Fonction helper pour formater la taille des fichiers
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+}
+
+// Fonction helper pour formater le temps d'expiration
+function formatExpiryTime(date) {
+    const now = new Date();
+    const diff = date - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor(diff / (1000 * 60));
+    
+    if (minutes < 60) {
+        return `${minutes} min`;
+    } else if (hours < 24) {
+        return `${hours}h`;
+    } else {
+        const days = Math.floor(hours / 24);
+        return `${days} jour${days > 1 ? 's' : ''}`;
     }
 }
 
@@ -50,7 +136,8 @@ const upload = multer({
 });
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '6gb' }));
+app.use(express.urlencoded({ limit: '6gb', extended: true }));
 app.use(express.static('public'));
 
 // Servir les fichiers statiques
@@ -61,13 +148,17 @@ app.get('/', (req, res) => {
 // Route d'upload
 app.post('/api/upload', upload.array('files'), async (req, res) => {
     try {
+        console.log('Upload démarré');
         const shareId = req.shareId;
         const files = req.files;
         const expiryHours = parseInt(req.body.expiryHours) || 24;
         const maxDownloads = parseInt(req.body.maxDownloads) || 0;
         const password = req.body.password;
         
+        console.log(`Fichiers reçus: ${files ? files.length : 0}`);
+        
         if (!files || files.length === 0) {
+            console.error('Aucun fichier envoyé');
             return res.status(400).json({ error: 'Aucun fichier envoyé' });
         }
         
@@ -78,6 +169,7 @@ app.post('/api/upload', upload.array('files'), async (req, res) => {
         // Hasher le mot de passe si fourni
         let hashedPassword = null;
         if (password && password.trim() !== '') {
+            console.log('Hachage du mot de passe...');
             hashedPassword = await bcrypt.hash(password, 10);
         }
         
@@ -97,11 +189,43 @@ app.post('/api/upload', upload.array('files'), async (req, res) => {
             password: hashedPassword
         };
         
+        console.log('Sauvegarde des métadonnées...');
+        
         // Sauvegarder les métadonnées
         await fs.writeFile(
             path.join(DATA_DIR, `${shareId}.json`),
             JSON.stringify(metadata, null, 2)
         );
+        
+        console.log('Upload terminé avec succès');
+        
+        // Envoyer notification Telegram
+        if (TELEGRAM_ENABLED) {
+            try {
+                const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+                const filesList = files.map(f => `  - ${f.originalname} (${formatFileSize(f.size)})`).join('\n');
+                const expiryInfo = formatExpiryTime(expiryDate);
+                const downloadLimit = maxDownloads === 0 ? 'Illimite' : maxDownloads;
+                const passwordProtected = hashedPassword ? 'Oui' : 'Non';
+                
+                const message = `🚀 Nouveau partage FileShare
+
+📁 Fichier(s): ${files.length}
+${filesList}
+
+💾 Taille totale: ${formatFileSize(totalSize)}
+⏰ Expiration: ${expiryInfo}
+📊 Telechargements max: ${downloadLimit}
+🔐 Mot de passe: ${passwordProtected}
+
+🔗 ID: ${shareId}
+📅 ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`;
+                
+                await sendTelegramNotification(message);
+            } catch (err) {
+                console.error('❌ Erreur notification Telegram:', err.message);
+            }
+        }
         
         // Formater la réponse
         const expiryInfo = formatExpiryTime(expiryDate);
@@ -115,8 +239,8 @@ app.post('/api/upload', upload.array('files'), async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Erreur upload:', error);
-        res.status(500).json({ error: 'Erreur lors de l\'upload' });
+        console.error('Erreur upload détaillée:', error);
+        res.status(500).json({ error: 'Erreur lors de l\'upload: ' + error.message });
     }
 });
 
@@ -284,20 +408,6 @@ schedule.scheduleJob('0 * * * *', async () => {
         console.error('Erreur nettoyage automatique:', error);
     }
 });
-
-// Fonction helper pour formater le temps d'expiration
-function formatExpiryTime(date) {
-    const now = new Date();
-    const diff = date - now;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    
-    if (hours < 24) {
-        return `${hours}h`;
-    } else {
-        const days = Math.floor(hours / 24);
-        return `${days} jour${days > 1 ? 's' : ''}`;
-    }
-}
 
 // Générer la page de mot de passe
 function generatePasswordPage(shareId) {
@@ -714,6 +824,11 @@ initDirectories().then(() => {
         console.log(`\x1b[35m█\x1b[0m  Port: \x1b[36m${PORT}\x1b[0m                                  \x1b[35m█\x1b[0m`);
         console.log(`\x1b[35m█\x1b[0m  URL: \x1b[36mhttp://0.0.0.0:${PORT}\x1b[0m                 \x1b[35m█\x1b[0m`);
         console.log(`\x1b[35m█\x1b[0m  Protection mot de passe: \x1b[32mActivée\x1b[0m          \x1b[35m█\x1b[0m`);
+        if (TELEGRAM_ENABLED) {
+            console.log(`\x1b[35m█\x1b[0m  Notifications Telegram: \x1b[32m✓ Activées\x1b[0m       \x1b[35m█\x1b[0m`);
+        } else {
+            console.log(`\x1b[35m█\x1b[0m  Notifications Telegram: \x1b[90m✗ Désactivées\x1b[0m    \x1b[35m█\x1b[0m`);
+        }
         console.log(`\x1b[35m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1b[0m`);
     });
 });
