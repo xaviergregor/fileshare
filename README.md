@@ -207,7 +207,7 @@ schedule.scheduleJob('0 * * * *', async () => {
 
 # 📱 Configuration des notifications Telegram
 
-Guide pour configurer les notifications Telegram pour XGR FileShare.
+Guide pour configurer les notifications Telegram pour FileShare.
 
 ## 📋 Prérequis
 
@@ -230,8 +230,8 @@ Envoyez la commande :
 ### 3. Choisir un nom
 
 BotFather vous demandera :
-- **Nom du bot** (ex: "XGR FileShare Notifier")
-- **Username du bot** (doit finir par "bot", ex: "xgr_fileshare_bot")
+- **Nom du bot** (ex: "FileShare Notifier")
+- **Username du bot** (doit finir par "bot", ex: "fileshare_bot")
 
 ### 4. Récupérer le token
 
@@ -252,7 +252,7 @@ BotFather vous donnera un **token** qui ressemble à ça :
 
 ### Méthode 2 : Avec votre bot
 
-1. Recherchez votre bot dans Telegram (ex: `@xgr_fileshare_bot`)
+1. Recherchez votre bot dans Telegram (ex: `@fileshare_bot`)
 2. Démarrez une conversation avec `/start`
 3. Ouvrez dans votre navigateur :
 ```
@@ -263,7 +263,7 @@ Remplacez `<VOTRE_BOT_TOKEN>` par votre token
 4. Cherchez `"chat":{"id":123456789}` dans la réponse
 5. Le nombre après `"id":` est votre Chat ID
 
-## ⚙️ Étape 3 : Configurer XGR FileShare
+## ⚙️ Étape 3 : Configurer FileShare
 
 ### Modifier docker-compose.yml
 
