@@ -205,6 +205,124 @@ schedule.scheduleJob('0 * * * *', async () => {
 
 ---
 
+# 📱 Configuration des notifications Telegram
+
+Guide pour configurer les notifications Telegram pour XGR FileShare.
+
+## 📋 Prérequis
+
+- Un compte Telegram
+- L'application Telegram installée
+
+## 🤖 Étape 1 : Créer un bot Telegram
+
+### 1. Ouvrir BotFather
+
+Dans Telegram, recherchez et ouvrez **@BotFather** (le bot officiel de Telegram pour créer des bots)
+
+### 2. Créer un nouveau bot
+
+Envoyez la commande :
+```
+/newbot
+```
+
+### 3. Choisir un nom
+
+BotFather vous demandera :
+- **Nom du bot** (ex: "XGR FileShare Notifier")
+- **Username du bot** (doit finir par "bot", ex: "xgr_fileshare_bot")
+
+### 4. Récupérer le token
+
+BotFather vous donnera un **token** qui ressemble à ça :
+```
+123456789:ABCdefGHIjklMNOpqrsTUVwxyz1234567890
+```
+
+⚠️ **Gardez ce token secret !** C'est la clé d'accès à votre bot.
+
+## 💬 Étape 2 : Obtenir votre Chat ID
+
+### Méthode 1 : Avec un bot helper
+
+1. Dans Telegram, recherchez **@userinfobot**
+2. Démarrez une conversation avec `/start`
+3. Il vous donnera votre **Chat ID** (ex: `123456789`)
+
+### Méthode 2 : Avec votre bot
+
+1. Recherchez votre bot dans Telegram (ex: `@xgr_fileshare_bot`)
+2. Démarrez une conversation avec `/start`
+3. Ouvrez dans votre navigateur :
+```
+https://api.telegram.org/bot<VOTRE_BOT_TOKEN>/getUpdates
+```
+Remplacez `<VOTRE_BOT_TOKEN>` par votre token
+
+4. Cherchez `"chat":{"id":123456789}` dans la réponse
+5. Le nombre après `"id":` est votre Chat ID
+
+## ⚙️ Étape 3 : Configurer XGR FileShare
+
+### Modifier docker-compose.yml
+
+Ouvrez le fichier `docker-compose.yml` et modifiez ces lignes :
+
+```yaml
+environment:
+  - PORT=3000
+  - NODE_ENV=production
+  - TZ=Europe/Paris
+  - TELEGRAM_ENABLED=true                              # Activer les notifications
+  - TELEGRAM_BOT_TOKEN=123456789:ABCdefGHI...         # Votre token
+  - TELEGRAM_CHAT_ID=123456789                        # Votre chat ID
+```
+
+### Redémarrer le service
+
+```bash
+docker compose down
+docker compose up -d --build
+```
+
+## 🔕 Désactiver les notifications
+
+Pour désactiver temporairement les notifications sans supprimer la configuration :
+
+```yaml
+environment:
+  - TELEGRAM_ENABLED=false    # Passer à false
+  - TELEGRAM_BOT_TOKEN=123456789:ABCdefGHI...
+  - TELEGRAM_CHAT_ID=123456789
+```
+
+Puis redémarrez :
+```bash
+docker compose restart fileshare
+```
+
+## 📊 Exemple de notification
+
+Voici à quoi ressemble une notification :
+
+```
+🚀 Nouveau partage FileShare
+
+📁 Fichier(s): 2
+📄 Document.pdf (2.5 MB)
+📄 Présentation.pptx (15.3 MB)
+
+💾 Taille totale: 17.8 MB
+⏰ Expiration: 24h
+📊 Téléchargements max: 10
+🔐 Protégé par mot de passe: 🔒 Oui
+
+🔗 ID de partage: a1b2c3d4e5f6...
+📅 Date: 30/11/2024 14:35:22
+```
+---
+
 ## 🎨 Personnalisation
 
 ### Thème Dracula
