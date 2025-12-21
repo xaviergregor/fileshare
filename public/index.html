@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FileShare - Partage de fichiers sécurisé</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,51 +15,103 @@
         }
 
         :root {
-            --background: #282a36;
-            --current-line: #44475a;
-            --foreground: #f8f8f2;
-            --comment: #6272a4;
-            --cyan: #8be9fd;
-            --green: #50fa7b;
-            --orange: #ffb86c;
-            --pink: #ff79c6;
-            --purple: #bd93f9;
-            --red: #ff5555;
-            --yellow: #f1fa8c;
+            /* Backgrounds */
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #1c2128;
+            --bg-card: #161b22;
+            --bg-hover: #1f2937;
+
+            /* Borders */
+            --border: #30363d;
+            --border-light: #3d444d;
+
+            /* Green phosphorescent */
+            --green-bright: #3fb950;
+            --green-default: #238636;
+            --green-dim: #2ea043;
+            --green-glow: rgba(63, 185, 80, 0.4);
+
+            /* Accent colors */
+            --cyan: #56d4dd;
+            --purple: #a371f7;
+            --pink: #db61a2;
+            --yellow: #d29922;
+            --yellow-bright: #e3b341;
+            --red: #f85149;
+            --orange: #db6d28;
+
+            /* Text */
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-tertiary: #6e7681;
+
+            /* Typography */
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--background);
-            color: var(--foreground);
+            font-family: var(--font-mono);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+
+        /* Scanlines effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            z-index: 1000;
+            opacity: 0.4;
         }
 
         .header {
-            background: var(--current-line);
+            background: var(--bg-secondary);
             padding: 1.5rem 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border);
+            position: relative;
         }
 
         .header h1 {
-            color: var(--purple);
+            color: var(--green-bright);
             font-size: 1.8rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            text-shadow: 0 0 20px var(--green-glow);
         }
 
         .header h1::before {
-            content: "📤";
-            font-size: 2rem;
+            content: ">";
+            color: var(--text-tertiary);
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
 
         .header p {
-            color: var(--comment);
+            color: var(--text-secondary);
             margin-top: 0.5rem;
             font-size: 0.9rem;
+            padding-left: 1.5rem;
         }
 
         .container {
@@ -67,44 +122,90 @@
             width: 100%;
         }
 
-        .upload-section {
-            background: var(--current-line);
-            border-radius: 12px;
-            padding: 2rem;
+        /* Terminal Window */
+        .terminal-window {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 40px var(--green-glow);
+        }
+
+        .terminal-header {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27ca40; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-right: 50px;
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+        }
+
+        .upload-section {
+            background: transparent;
         }
 
         .drop-zone {
-            border: 3px dashed var(--purple);
+            border: 2px dashed var(--green-dim);
             border-radius: 8px;
             padding: 3rem 2rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(189, 147, 249, 0.05);
+            background: rgba(63, 185, 80, 0.03);
         }
 
         .drop-zone:hover, .drop-zone.drag-over {
-            border-color: var(--pink);
-            background: rgba(255, 121, 198, 0.1);
-            transform: scale(1.01);
+            border-color: var(--green-bright);
+            background: rgba(63, 185, 80, 0.08);
+            box-shadow: 0 0 30px var(--green-glow);
         }
 
         .drop-zone-icon {
             font-size: 4rem;
             margin-bottom: 1rem;
+            filter: grayscale(0.5);
         }
 
         .drop-zone h3 {
-            color: var(--purple);
-            font-size: 1.3rem;
+            color: var(--green-bright);
+            font-size: 1.2rem;
             margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px var(--green-glow);
         }
 
         .drop-zone p {
-            color: var(--comment);
-            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .drop-zone .hint {
+            margin-top: 0.5rem;
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
         }
 
         .file-input {
@@ -112,53 +213,77 @@
         }
 
         .btn {
-            background: var(--purple);
-            color: var(--background);
-            border: none;
-            padding: 0.8rem 1.5rem;
+            background: var(--green-default);
+            color: var(--text-primary);
+            border: 1px solid var(--green-bright);
+            padding: 0.75rem 1.5rem;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
+            font-family: var(--font-mono);
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            box-shadow: 0 0 10px var(--green-glow);
         }
 
         .btn:hover {
-            background: var(--pink);
+            background: var(--green-bright);
+            box-shadow: 0 0 20px var(--green-glow);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 121, 198, 0.4);
         }
 
         .btn:disabled {
-            background: var(--comment);
+            background: var(--bg-tertiary);
+            border-color: var(--border);
+            color: var(--text-tertiary);
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
-        .btn-success {
-            background: var(--green);
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            border-color: var(--purple);
+            color: var(--purple);
+            box-shadow: none;
         }
 
-        .btn-success:hover {
-            background: var(--cyan);
+        .btn-secondary:hover {
+            background: var(--purple);
+            color: var(--text-primary);
+            box-shadow: 0 0 15px rgba(163, 113, 247, 0.4);
+        }
+
+        .btn-danger {
+            background: rgba(248, 81, 73, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+            box-shadow: none;
+        }
+
+        .btn-danger:hover {
+            background: var(--red);
+            color: var(--text-primary);
         }
 
         .file-list {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
         }
 
         .file-item {
-            background: var(--background);
+            background: var(--bg-primary);
             padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.8rem;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 4px solid var(--cyan);
+            border-left: 3px solid var(--green-bright);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--green-bright);
         }
 
         .file-info {
@@ -166,14 +291,14 @@
         }
 
         .file-name {
-            color: var(--foreground);
+            color: var(--cyan);
             font-weight: 500;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.25rem;
         }
 
         .file-size {
-            color: var(--comment);
-            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
         }
 
         .file-actions {
@@ -182,87 +307,14 @@
         }
 
         .btn-small {
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-        }
-
-        .btn-remove {
-            background: var(--red);
-        }
-
-        .btn-remove:hover {
-            background: var(--orange);
-        }
-
-        .progress-section {
-            margin-top: 2rem;
-            display: none;
-        }
-
-        .progress-section.active {
-            display: block;
-        }
-
-        .progress-bar-container {
-            background: var(--background);
-            border-radius: 8px;
-            height: 30px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-            position: relative;
-        }
-
-        .progress-bar {
-            background: linear-gradient(90deg, var(--purple), var(--pink));
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--foreground);
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .share-section {
-            background: var(--current-line);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-top: 2rem;
-            display: none;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .share-section.active {
-            display: block;
-        }
-
-        .share-link-container {
-            background: var(--background);
-            padding: 1rem;
-            border-radius: 8px;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            margin-top: 1rem;
-        }
-
-        .share-link {
-            flex: 1;
-            background: transparent;
-            border: 2px solid var(--purple);
-            color: var(--cyan);
-            padding: 0.8rem;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-family: 'Courier New', monospace;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
         }
 
         .upload-options {
             margin-top: 1.5rem;
             padding-top: 1.5rem;
-            border-top: 1px solid var(--background);
+            border-top: 1px solid var(--border);
         }
 
         .option-group {
@@ -271,75 +323,201 @@
 
         .option-group label {
             display: block;
-            color: var(--foreground);
+            color: var(--cyan);
             margin-bottom: 0.5rem;
             font-weight: 500;
+            font-size: 0.9rem;
         }
 
         .option-group select,
         .option-group input[type="number"],
         .option-group input[type="password"] {
             width: 100%;
-            background: var(--background);
-            border: 2px solid var(--purple);
-            color: var(--foreground);
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
             padding: 0.7rem;
             border-radius: 6px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            transition: all 0.3s ease;
         }
 
         .option-group select:focus,
         .option-group input[type="number"]:focus,
         .option-group input[type="password"]:focus {
             outline: none;
-            border-color: var(--pink);
+            border-color: var(--green-dim);
+            box-shadow: 0 0 10px var(--green-glow);
         }
 
         .option-group input[type="password"]::placeholder {
-            color: var(--comment);
+            color: var(--text-tertiary);
+        }
+
+        .progress-section {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .progress-section.active {
+            display: block;
+        }
+
+        .progress-section h3 {
+            color: var(--green-bright);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progress-section h3::before {
+            content: "⏳";
+        }
+
+        .progress-bar-container {
+            background: var(--bg-primary);
+            border-radius: 6px;
+            height: 28px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--green-default), var(--green-bright));
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.8rem;
+            box-shadow: 0 0 15px var(--green-glow);
         }
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
 
         .stat-card {
-            background: var(--background);
+            background: var(--bg-primary);
             padding: 1rem;
-            border-radius: 8px;
-            border-left: 4px solid var(--green);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--cyan);
         }
 
         .stat-label {
-            color: var(--comment);
-            font-size: 0.85rem;
-            margin-bottom: 0.3rem;
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .stat-value {
-            color: var(--foreground);
-            font-size: 1.3rem;
+            color: var(--cyan);
+            font-size: 1.2rem;
             font-weight: 600;
         }
 
+        .share-section {
+            margin-top: 1.5rem;
+            display: none;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .share-section.active {
+            display: block;
+        }
+
+        .share-section h3 {
+            color: var(--green-bright);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            text-shadow: 0 0 10px var(--green-glow);
+        }
+
+        .share-section > p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .share-link-container {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 6px;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        .share-link {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--green-dim);
+            color: var(--green-bright);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+        }
+
+        .share-link:focus {
+            outline: none;
+            border-color: var(--green-bright);
+            box-shadow: 0 0 10px var(--green-glow);
+        }
+
         .footer {
-            background: var(--current-line);
-            padding: 1.5rem 2rem;
+            background: var(--bg-secondary);
+            padding: 1.25rem 2rem;
             text-align: center;
-            color: var(--comment);
-            margin-top: auto;
+            color: var(--text-tertiary);
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
         }
 
         .footer a {
-            color: var(--purple);
+            color: var(--green-bright);
             text-decoration: none;
+            transition: all 0.3s ease;
         }
 
         .footer a:hover {
-            color: var(--pink);
+            text-shadow: 0 0 10px var(--green-glow);
+        }
+
+        /* Command line prompt */
+        .cmd-line {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .cmd-line .prompt {
+            color: var(--green-bright);
+        }
+
+        .cmd-line .cmd {
+            color: var(--text-primary);
+        }
+
+        /* Upload button area */
+        .upload-action {
+            margin-top: 2rem;
+            text-align: center;
         }
 
         @media (max-width: 768px) {
@@ -347,8 +525,16 @@
                 padding: 1rem;
             }
 
+            .header {
+                padding: 1rem;
+            }
+
             .header h1 {
                 font-size: 1.4rem;
+            }
+
+            .terminal-body {
+                padding: 1rem;
             }
 
             .drop-zone {
@@ -364,109 +550,129 @@
             .share-link-container {
                 flex-direction: column;
             }
+
+            .share-link-container .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>FileShare</h1>
-        <p>Partagez vos fichiers de manière simple et sécurisée</p>
+        <p>// Partagez vos fichiers de manière simple et sécurisée</p>
     </div>
 
     <div class="container">
-        <div class="upload-section">
-            <div class="drop-zone" id="dropZone">
-                <div class="drop-zone-icon">📁</div>
-                <h3>Glissez-déposez vos fichiers ici</h3>
-                <p>ou cliquez pour sélectionner des fichiers</p>
-                <p style="margin-top: 0.5rem; color: var(--comment);">Taille maximale : 5 Go par fichier</p>
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-btn red"></div>
+                <div class="terminal-btn yellow"></div>
+                <div class="terminal-btn green"></div>
+                <div class="terminal-title">fileshare -- upload</div>
             </div>
-            <input type="file" id="fileInput" class="file-input" multiple>
-
-            <div class="file-list" id="fileList"></div>
-
-            <div class="upload-options">
-                <div class="option-group">
-                    <label for="expiryTime">Durée de conservation</label>
-                    <select id="expiryTime">
-                        <option value="1">1 heure</option>
-                        <option value="6">6 heures</option>
-                        <option value="24" selected>24 heures</option>
-                        <option value="72">3 jours</option>
-                        <option value="168">7 jours</option>
-                    </select>
+            <div class="terminal-body">
+                <div class="cmd-line">
+                    <span class="prompt">user@fileshare:~$</span>
+                    <span class="cmd"> upload --secure --expires 24h</span>
                 </div>
 
-                <div class="option-group">
-                    <label for="maxDownloads">Nombre de téléchargements maximum</label>
-                    <select id="maxDownloads">
-                        <option value="1">1 téléchargement</option>
-                        <option value="5">5 téléchargements</option>
-                        <option value="10" selected>10 téléchargements</option>
-                        <option value="50">50 téléchargements</option>
-                        <option value="0">Illimité</option>
-                    </select>
+                <div class="upload-section">
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-zone-icon">📁</div>
+                        <h3>Glissez-déposez vos fichiers ici</h3>
+                        <p>ou cliquez pour sélectionner des fichiers</p>
+                        <p class="hint">Taille maximale : 5 Go par fichier</p>
+                    </div>
+                    <input type="file" id="fileInput" class="file-input" multiple>
+
+                    <div class="file-list" id="fileList"></div>
+
+                    <div class="upload-options">
+                        <div class="option-group">
+                            <label for="expiryTime">Durée de conservation</label>
+                            <select id="expiryTime">
+                                <option value="1">1 heure</option>
+                                <option value="6">6 heures</option>
+                                <option value="24" selected>24 heures</option>
+                                <option value="72">3 jours</option>
+                                <option value="168">7 jours</option>
+                            </select>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="maxDownloads">Nombre de téléchargements maximum</label>
+                            <select id="maxDownloads">
+                                <option value="1">1 téléchargement</option>
+                                <option value="5">5 téléchargements</option>
+                                <option value="10" selected>10 téléchargements</option>
+                                <option value="50">50 téléchargements</option>
+                                <option value="0">Illimité</option>
+                            </select>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="password">🔒 Mot de passe (optionnel)</label>
+                            <input type="password" id="password" placeholder="Laisser vide pour pas de protection">
+                        </div>
+                    </div>
+
+                    <div class="upload-action">
+                        <button class="btn" id="uploadBtn" disabled>
+                            <span>📤</span> Envoyer les fichiers
+                        </button>
+                    </div>
                 </div>
 
-                <div class="option-group">
-                    <label for="password">🔒 Mot de passe (optionnel)</label>
-                    <input type="password" id="password" placeholder="Laisser vide pour pas de protection">
+                <div class="progress-section" id="progressSection">
+                    <h3>Upload en cours...</h3>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar">0%</div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-label">Vitesse</div>
+                            <div class="stat-value" id="uploadSpeed">0 MB/s</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Temps restant</div>
+                            <div class="stat-value" id="timeRemaining">--</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div style="margin-top: 2rem; text-align: center;">
-                <button class="btn btn-success" id="uploadBtn" disabled>
-                    <span>📤</span> Envoyer les fichiers
-                </button>
-            </div>
-        </div>
-
-        <div class="progress-section" id="progressSection">
-            <h3 style="color: var(--purple); margin-bottom: 1rem;">Upload en cours...</h3>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progressBar">0%</div>
-            </div>
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-label">Vitesse</div>
-                    <div class="stat-value" id="uploadSpeed">0 MB/s</div>
+                <div class="share-section" id="shareSection">
+                    <h3>✅ Fichiers envoyés avec succès !</h3>
+                    <p>Partagez ce lien pour télécharger vos fichiers :</p>
+                    <div class="share-link-container">
+                        <input type="text" class="share-link" id="shareLink" readonly>
+                        <button class="btn btn-secondary" id="copyBtn">
+                            <span>📋</span> Copier
+                        </button>
+                    </div>
+                    <div class="stats" style="margin-top: 1.25rem;">
+                        <div class="stat-card" style="border-left-color: var(--yellow);">
+                            <div class="stat-label">Expiration</div>
+                            <div class="stat-value" style="color: var(--yellow-bright);" id="expiryInfo">--</div>
+                        </div>
+                        <div class="stat-card" style="border-left-color: var(--green-bright);">
+                            <div class="stat-label">Téléchargements restants</div>
+                            <div class="stat-value" style="color: var(--green-bright);" id="downloadsInfo">--</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem; text-align: center;">
+                        <button class="btn" onclick="location.reload()">
+                            <span>📤</span> Envoyer d'autres fichiers
+                        </button>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Temps restant</div>
-                    <div class="stat-value" id="timeRemaining">--</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="share-section" id="shareSection">
-            <h3 style="color: var(--green); margin-bottom: 1rem;">✅ Fichiers envoyés avec succès !</h3>
-            <p style="color: var(--comment); margin-bottom: 1rem;">Partagez ce lien pour télécharger vos fichiers :</p>
-            <div class="share-link-container">
-                <input type="text" class="share-link" id="shareLink" readonly>
-                <button class="btn" id="copyBtn">
-                    <span>📋</span> Copier
-                </button>
-            </div>
-            <div class="stats" style="margin-top: 1.5rem;">
-                <div class="stat-card">
-                    <div class="stat-label">Expiration</div>
-                    <div class="stat-value" id="expiryInfo">--</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Téléchargements restants</div>
-                    <div class="stat-value" id="downloadsInfo">--</div>
-                </div>
-            </div>
-            <div style="margin-top: 1.5rem; text-align: center;">
-                <button class="btn" onclick="location.reload()">
-                    <span>📤</span> Envoyer d'autres fichiers
-                </button>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        <p>FileShare - Partage de fichiers sécurisé | Développé par <a href="https://github.com/xaviergregor">Xavier Gregor</a></p>
+        <p>FileShare — Partage de fichiers sécurisé | Développé par <a href="https://github.com/xaviergregor">Xavier Gregor</a></p>
     </div>
 
     <script src="app.js"></script>
