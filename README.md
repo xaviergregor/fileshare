@@ -52,7 +52,6 @@ FileShare est une application web moderne de partage de fichiers inspirée de We
 - 🧹 Nettoyage automatique des fichiers expirés
 
 ### Interface
-- 🎨 Thème Dracula complet
 - 📱 Design responsive
 - 🌍 Interface en français
 - ⚡ Performances optimisées
