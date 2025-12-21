@@ -516,7 +516,6 @@ Ouvrez une issue sur GitHub avec :
 - 📤 Upload de fichiers
 - 🔗 Génération de liens de partage
 - ⏰ Expiration automatique
-- 🎨 Thème Dracula
 
 ---
 
