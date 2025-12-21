@@ -418,105 +418,297 @@ function generatePasswordPage(shareId) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mot de passe requis - FileShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         :root {
-            --background: #282a36;
-            --current-line: #44475a;
-            --foreground: #f8f8f2;
-            --comment: #6272a4;
-            --green: #50fa7b;
-            --purple: #bd93f9;
-            --pink: #ff79c6;
-            --red: #ff5555;
+            /* Backgrounds */
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #1c2128;
+
+            /* Borders */
+            --border: #30363d;
+
+            /* Green phosphorescent */
+            --green-bright: #3fb950;
+            --green-default: #238636;
+            --green-dim: #2ea043;
+            --green-glow: rgba(63, 185, 80, 0.4);
+
+            /* Accent colors */
+            --cyan: #56d4dd;
+            --red: #f85149;
+            --yellow: #d29922;
+
+            /* Text */
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-tertiary: #6e7681;
+
+            /* Typography */
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--background);
-            color: var(--foreground);
+            font-family: var(--font-mono);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
         }
-        .password-box {
-            background: var(--current-line);
-            border-radius: 12px;
-            padding: 3rem;
-            text-align: center;
+
+        /* Scanlines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            z-index: 1000;
+            opacity: 0.4;
+        }
+
+        /* Terminal Window */
+        .terminal-window {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
             max-width: 500px;
             width: 100%;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 40px var(--green-glow);
         }
-        h1 {
-            color: var(--purple);
-            font-size: 2rem;
+
+        .terminal-header {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27ca40; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-right: 50px;
+        }
+
+        .terminal-body {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .lock-icon {
+            font-size: 3rem;
             margin-bottom: 1rem;
+            display: block;
         }
-        p {
-            color: var(--comment);
+
+        h1 {
+            color: var(--yellow);
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .description {
+            color: var(--text-secondary);
             margin-bottom: 2rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
         }
+
+        .cmd-line {
+            background: var(--bg-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .cmd-line .prompt {
+            color: var(--green-bright);
+        }
+
+        .cmd-line .cmd {
+            color: var(--text-primary);
+        }
+
+        .cmd-line .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: var(--green-bright);
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
         .input-group {
             margin-bottom: 1.5rem;
         }
+
         input[type="password"] {
             width: 100%;
-            background: var(--background);
-            border: 2px solid var(--purple);
-            color: var(--foreground);
-            padding: 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.875rem 1rem;
             border-radius: 6px;
             font-size: 1rem;
+            font-family: var(--font-mono);
+            transition: all 0.3s ease;
         }
+
         input[type="password"]:focus {
             outline: none;
-            border-color: var(--pink);
+            border-color: var(--green-dim);
+            box-shadow: 0 0 15px var(--green-glow);
         }
+
+        input[type="password"]::placeholder {
+            color: var(--text-tertiary);
+        }
+
         .btn {
-            background: var(--purple);
-            color: var(--background);
-            border: none;
-            padding: 1rem 2rem;
+            background: var(--green-default);
+            color: var(--text-primary);
+            border: 1px solid var(--green-bright);
+            padding: 0.875rem 2rem;
             border-radius: 6px;
             cursor: pointer;
             font-size: 1rem;
             font-weight: 600;
+            font-family: var(--font-mono);
             width: 100%;
             transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--green-glow);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
+
         .btn:hover {
-            background: var(--pink);
+            background: var(--green-bright);
+            box-shadow: 0 0 20px var(--green-glow);
             transform: translateY(-2px);
         }
+
         .error {
-            background: rgba(255, 85, 85, 0.2);
+            background: rgba(248, 81, 73, 0.1);
             border: 1px solid var(--red);
             color: var(--red);
-            padding: 1rem;
+            padding: 0.875rem 1rem;
             border-radius: 6px;
             margin-bottom: 1rem;
             display: none;
+            font-size: 0.9rem;
+            text-align: left;
         }
+
+        .error::before {
+            content: "❌ ";
+        }
+
         .error.show {
             display: block;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .back-link {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .back-link a {
+            color: var(--text-tertiary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: var(--green-bright);
         }
     </style>
 </head>
 <body>
-    <div class="password-box">
-        <h1>🔒 Fichiers protégés</h1>
-        <p>Ce partage est protégé par un mot de passe. Veuillez entrer le mot de passe pour accéder aux fichiers.</p>
-        
-        <div class="error" id="error"></div>
-        
-        <form id="passwordForm">
-            <div class="input-group">
-                <input type="password" id="password" placeholder="Entrez le mot de passe" required autofocus>
+    <div class="terminal-window">
+        <div class="terminal-header">
+            <div class="terminal-btn red"></div>
+            <div class="terminal-btn yellow"></div>
+            <div class="terminal-btn green"></div>
+            <div class="terminal-title">fileshare -- authenticate</div>
+        </div>
+        <div class="terminal-body">
+            <span class="lock-icon">🔒</span>
+            <h1>Fichiers protégés</h1>
+            <p class="description">Ce partage est protégé par un mot de passe.<br>Veuillez entrer le mot de passe pour accéder aux fichiers.</p>
+            
+            <div class="cmd-line">
+                <span class="prompt">auth@fileshare:~$</span>
+                <span class="cmd"> unlock --password </span>
+                <span class="cursor"></span>
             </div>
-            <button type="submit" class="btn">Déverrouiller</button>
-        </form>
+            
+            <div class="error" id="error"></div>
+            
+            <form id="passwordForm">
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Entrez le mot de passe" required autofocus>
+                </div>
+                <button type="submit" class="btn">
+                    <span>🔓</span> Déverrouiller
+                </button>
+            </form>
+
+            <div class="back-link">
+                <a href="/">← Retour à l'accueil</a>
+            </div>
+        </div>
     </div>
     
     <script>
@@ -579,35 +771,96 @@ function generateDownloadPage(metadata) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Télécharger les fichiers - FileShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         :root {
-            --background: #282a36;
-            --current-line: #44475a;
-            --foreground: #f8f8f2;
-            --comment: #6272a4;
-            --cyan: #8be9fd;
-            --green: #50fa7b;
-            --purple: #bd93f9;
-            --pink: #ff79c6;
+            /* Backgrounds */
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #1c2128;
+
+            /* Borders */
+            --border: #30363d;
+
+            /* Green phosphorescent */
+            --green-bright: #3fb950;
+            --green-default: #238636;
+            --green-dim: #2ea043;
+            --green-glow: rgba(63, 185, 80, 0.4);
+
+            /* Accent colors */
+            --cyan: #56d4dd;
+            --yellow: #d29922;
+            --yellow-bright: #e3b341;
+
+            /* Text */
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-tertiary: #6e7681;
+
+            /* Typography */
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--background);
-            color: var(--foreground);
+            font-family: var(--font-mono);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
+
+        /* Scanlines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            z-index: 1000;
+            opacity: 0.4;
+        }
+
         .header {
-            background: var(--current-line);
+            background: var(--bg-secondary);
             padding: 1.5rem 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border);
         }
+
         .header h1 {
-            color: var(--purple);
-            font-size: 1.8rem;
+            color: var(--green-bright);
+            font-size: 1.6rem;
+            text-shadow: 0 0 20px var(--green-glow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+
+        .header h1::before {
+            content: ">";
+            color: var(--text-tertiary);
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
         .container {
             flex: 1;
             max-width: 800px;
@@ -615,120 +868,270 @@ function generateDownloadPage(metadata) {
             padding: 0 2rem;
             width: 100%;
         }
-        .download-box {
-            background: var(--current-line);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+        /* Terminal Window */
+        .terminal-window {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 40px var(--green-glow);
         }
-        .download-box h2 {
-            color: var(--green);
+
+        .terminal-header {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27ca40; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-right: 50px;
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+        }
+
+        .cmd-line {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
             margin-bottom: 1.5rem;
-            font-size: 1.5rem;
         }
+
+        .cmd-line .prompt {
+            color: var(--green-bright);
+        }
+
+        .cmd-line .cmd {
+            color: var(--text-primary);
+        }
+
+        .download-box h2 {
+            color: var(--green-bright);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            text-shadow: 0 0 10px var(--green-glow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
+
         .info-card {
-            background: var(--background);
+            background: var(--bg-primary);
             padding: 1rem;
-            border-radius: 8px;
-            border-left: 4px solid var(--cyan);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--cyan);
         }
+
+        .info-card.expiry {
+            border-left-color: var(--yellow);
+        }
+
         .info-label {
-            color: var(--comment);
-            font-size: 0.85rem;
-            margin-bottom: 0.3rem;
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
         .info-value {
-            color: var(--foreground);
+            color: var(--cyan);
             font-size: 1.1rem;
             font-weight: 600;
         }
-        .file-list {
-            margin: 2rem 0;
+
+        .info-card.expiry .info-value {
+            color: var(--yellow-bright);
         }
+
+        .file-list {
+            margin: 1.5rem 0;
+        }
+
         .file-item {
-            background: var(--background);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.8rem;
+            background: var(--bg-primary);
+            padding: 1rem 1.25rem;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 4px solid var(--purple);
-        }
-        .file-name {
-            color: var(--foreground);
-            font-weight: 500;
-        }
-        .file-size {
-            color: var(--comment);
-            font-size: 0.85rem;
-        }
-        .btn {
-            background: var(--purple);
-            color: var(--background);
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--green-bright);
             transition: all 0.3s ease;
         }
+
+        .file-item:hover {
+            border-color: var(--green-dim);
+            box-shadow: 0 0 15px var(--green-glow);
+        }
+
+        .file-name {
+            color: var(--text-primary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-name::before {
+            content: "📄";
+        }
+
+        .file-size {
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn {
+            background: var(--green-default);
+            color: var(--text-primary);
+            border: 1px solid var(--green-bright);
+            padding: 0.7rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--green-glow);
+        }
+
         .btn:hover {
-            background: var(--pink);
+            background: var(--green-bright);
+            box-shadow: 0 0 20px var(--green-glow);
             transform: translateY(-2px);
         }
-        .btn-green {
-            background: var(--green);
+
+        .footer {
+            background: var(--bg-secondary);
+            padding: 1.25rem 2rem;
+            text-align: center;
+            color: var(--text-tertiary);
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
         }
-        .btn-green:hover {
-            background: var(--cyan);
+
+        .footer a {
+            color: var(--green-bright);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-shadow: 0 0 10px var(--green-glow);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .terminal-body {
+                padding: 1rem;
+            }
+
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>📥 FileShare</h1>
+        <h1>FileShare</h1>
     </div>
+
     <div class="container">
-        <div class="download-box">
-            <h2>Fichiers partagés</h2>
-            <div class="info-grid">
-                <div class="info-card">
-                    <div class="info-label">Fichiers</div>
-                    <div class="info-value">${metadata.files.length}</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-label">Taille totale</div>
-                    <div class="info-value">${formatSize(totalSize)}</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-label">Expire le</div>
-                    <div class="info-value">${new Date(metadata.expiryDate).toLocaleDateString('fr-FR')}</div>
-                </div>
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-btn red"></div>
+                <div class="terminal-btn yellow"></div>
+                <div class="terminal-btn green"></div>
+                <div class="terminal-title">fileshare -- download</div>
             </div>
-            <div class="file-list">
-                ${metadata.files.map((file, index) => `
-                    <div class="file-item">
-                        <div>
-                            <div class="file-name">📄 ${file.originalName}</div>
-                            <div class="file-size">${formatSize(file.size)}</div>
+            <div class="terminal-body">
+                <div class="cmd-line">
+                    <span class="prompt">user@fileshare:~$</span>
+                    <span class="cmd"> fetch --id ${metadata.shareId}</span>
+                </div>
+
+                <div class="download-box">
+                    <h2>📥 Fichiers partagés</h2>
+                    
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">Fichiers</div>
+                            <div class="info-value">${metadata.files.length}</div>
                         </div>
-                        <a href="#" onclick="downloadFile('${metadata.shareId}', ${index}); return false;" class="btn btn-green">
-                            ⬇️ Télécharger
-                        </a>
+                        <div class="info-card">
+                            <div class="info-label">Taille totale</div>
+                            <div class="info-value">${formatSize(totalSize)}</div>
+                        </div>
+                        <div class="info-card expiry">
+                            <div class="info-label">Expire le</div>
+                            <div class="info-value">${new Date(metadata.expiryDate).toLocaleDateString('fr-FR')}</div>
+                        </div>
                     </div>
-                `).join('')}
+
+                    <div class="file-list">
+                        ${metadata.files.map((file, index) => `
+                            <div class="file-item">
+                                <div>
+                                    <div class="file-name">${file.originalName}</div>
+                                    <div class="file-size">${formatSize(file.size)}</div>
+                                </div>
+                                <a href="#" onclick="downloadFile('${metadata.shareId}', ${index}); return false;" class="btn">
+                                    ⬇️ Télécharger
+                                </a>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+
+    <div class="footer">
+        <p>FileShare — Partage de fichiers sécurisé | <a href="/">Envoyer des fichiers</a></p>
     </div>
     
     <script>
@@ -761,55 +1164,187 @@ function generateErrorPage(message) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Erreur - FileShare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #1c2128;
+            --border: #30363d;
+            --green-bright: #3fb950;
+            --green-default: #238636;
+            --green-glow: rgba(63, 185, 80, 0.4);
+            --red: #f85149;
+            --red-glow: rgba(248, 81, 73, 0.4);
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-tertiary: #6e7681;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #282a36;
-            color: #f8f8f2;
+            font-family: var(--font-mono);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
         }
-        .error-box {
-            background: #44475a;
-            border-radius: 12px;
-            padding: 3rem;
-            text-align: center;
+
+        /* Scanlines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            z-index: 1000;
+            opacity: 0.4;
+        }
+
+        /* Terminal Window */
+        .terminal-window {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
             max-width: 500px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 40px var(--red-glow);
         }
-        h1 {
-            color: #ff5555;
-            font-size: 4rem;
+
+        .terminal-header {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27ca40; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-right: 50px;
+        }
+
+        .terminal-body {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 3.5rem;
             margin-bottom: 1rem;
+            display: block;
         }
-        p {
-            color: #f8f8f2;
-            font-size: 1.2rem;
+
+        .error-code {
+            color: var(--red);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 15px var(--red-glow);
+        }
+
+        .cmd-line {
+            background: var(--bg-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .cmd-line .prompt {
+            color: var(--red);
+        }
+
+        .cmd-line .cmd {
+            color: var(--text-primary);
+        }
+
+        .error-message {
+            color: var(--text-secondary);
+            font-size: 1rem;
             margin-bottom: 2rem;
+            line-height: 1.6;
         }
-        a {
-            background: #bd93f9;
-            color: #282a36;
-            padding: 0.8rem 1.5rem;
+
+        .btn {
+            background: var(--green-default);
+            color: var(--text-primary);
+            border: 1px solid var(--green-bright);
+            padding: 0.875rem 1.5rem;
             border-radius: 6px;
             text-decoration: none;
             font-weight: 600;
-            display: inline-block;
+            font-family: var(--font-mono);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--green-glow);
         }
-        a:hover {
-            background: #ff79c6;
+
+        .btn:hover {
+            background: var(--green-bright);
+            box-shadow: 0 0 20px var(--green-glow);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <div class="error-box">
-        <h1>⚠️</h1>
-        <p>${message}</p>
-        <a href="/">Retour à l'accueil</a>
+    <div class="terminal-window">
+        <div class="terminal-header">
+            <div class="terminal-btn red"></div>
+            <div class="terminal-btn yellow"></div>
+            <div class="terminal-btn green"></div>
+            <div class="terminal-title">fileshare -- error</div>
+        </div>
+        <div class="terminal-body">
+            <span class="error-icon">⚠️</span>
+            <div class="error-code">ERROR</div>
+            
+            <div class="cmd-line">
+                <span class="prompt">error@fileshare:~$</span>
+                <span class="cmd"> exit 1</span>
+            </div>
+            
+            <p class="error-message">${message}</p>
+            
+            <a href="/" class="btn">
+                <span>←</span> Retour à l'accueil
+            </a>
+        </div>
     </div>
 </body>
 </html>
