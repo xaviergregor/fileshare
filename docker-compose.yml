@@ -12,9 +12,6 @@ services:
       - PORT=3000
       - NODE_ENV=production
       - TZ=Europe/Paris
-      - TELEGRAM_ENABLED=false
-      - TELEGRAM_BOT_TOKEN=
-      - TELEGRAM_CHAT_ID=
     networks:
       - fileshare-network
     deploy:
