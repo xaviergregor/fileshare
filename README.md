@@ -264,18 +264,14 @@ Remplacez `<VOTRE_BOT_TOKEN>` par votre token
 
 ## ⚙️ Étape 3 : Configurer FileShare
 
-### Modifier docker-compose.yml
+### Modifier .env
 
-Ouvrez le fichier `docker-compose.yml` et modifiez ces lignes :
+Ouvrez le fichier `.env` et modifiez ces lignes :
 
-```yaml
-environment:
-  - PORT=3000
-  - NODE_ENV=production
-  - TZ=Europe/Paris
-  - TELEGRAM_ENABLED=true                              # Activer les notifications
-  - TELEGRAM_BOT_TOKEN=123456789:ABCdefGHI...         # Votre token
-  - TELEGRAM_CHAT_ID=123456789                        # Votre chat ID
+```env
+TELEGRAM_ENABLED=true                              # Activer les notifications
+TELEGRAM_BOT_TOKEN=123456789:ABCdefGHI...         # Votre token
+TELEGRAM_CHAT_ID=123456789                        # Votre chat ID
 ```
 
 ### Redémarrer le service
@@ -289,11 +285,10 @@ docker compose up -d --build
 
 Pour désactiver temporairement les notifications sans supprimer la configuration :
 
-```yaml
-environment:
-  - TELEGRAM_ENABLED=false    # Passer à false
-  - TELEGRAM_BOT_TOKEN=123456789:ABCdefGHI...
-  - TELEGRAM_CHAT_ID=123456789
+```env
+TELEGRAM_ENABLED=false    # Passer à false
+TELEGRAM_BOT_TOKEN=123456789:ABCdefGHI...
+TELEGRAM_CHAT_ID=123456789
 ```
 
 Puis redémarrez :
@@ -324,26 +319,6 @@ Voici à quoi ressemble une notification :
 
 ## 🎨 Personnalisation
 
-### Thème Dracula
-
-Le thème utilise la palette officielle Dracula :
-
-```css
-:root {
-    --background: #282a36;      /* Arrière-plan */
-    --current-line: #44475a;    /* Ligne actuelle */
-    --foreground: #f8f8f2;      /* Texte principal */
-    --comment: #6272a4;         /* Commentaires */
-    --cyan: #8be9fd;            /* Cyan */
-    --green: #50fa7b;           /* Vert */
-    --orange: #ffb86c;          /* Orange */
-    --pink: #ff79c6;            /* Rose */
-    --purple: #bd93f9;          /* Violet */
-    --red: #ff5555;             /* Rouge */
-    --yellow: #f1fa8c;          /* Jaune */
-}
-```
-
 ### Modifier le logo
 
 Remplacez l'emoji dans `public/index.html` :
@@ -370,6 +345,7 @@ fileshare/
 ├── Dockerfile             # Configuration Docker
 ├── docker-compose.yml     # Orchestration Docker
 ├── .dockerignore         # Fichiers exclus du build Docker
+├── .env                  # Fichier de configuration
 ├── .gitignore            # Fichiers exclus de Git
 └── README.md             # Ce fichier
 ```
