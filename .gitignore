@@ -1,0 +1,7 @@
+# Environnement
+.env
+.env.*
+
+# Données persistantes
+data/
+uploads/
