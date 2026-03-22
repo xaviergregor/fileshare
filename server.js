@@ -434,10 +434,10 @@ function generatePasswordPage(shareId) {
             --border: #30363d;
 
             /* Green phosphorescent */
-            --green-bright: #3fb950;
-            --green-default: #238636;
-            --green-dim: #2ea043;
-            --green-glow: rgba(63, 185, 80, 0.4);
+            --green-bright: #F77E2D;
+            --green-default: #c4611e;
+            --green-dim: #d46d20;
+            --green-glow: rgba(247, 126, 45, 0.4);
 
             /* Accent colors */
             --cyan: #56d4dd;
@@ -787,10 +787,10 @@ function generateDownloadPage(metadata) {
             --border: #30363d;
 
             /* Green phosphorescent */
-            --green-bright: #3fb950;
-            --green-default: #238636;
-            --green-dim: #2ea043;
-            --green-glow: rgba(63, 185, 80, 0.4);
+            --green-bright: #F77E2D;
+            --green-default: #c4611e;
+            --green-dim: #d46d20;
+            --green-glow: rgba(247, 126, 45, 0.4);
 
             /* Accent colors */
             --cyan: #56d4dd;
@@ -1175,9 +1175,9 @@ function generateErrorPage(message) {
             --bg-secondary: #161b22;
             --bg-tertiary: #1c2128;
             --border: #30363d;
-            --green-bright: #3fb950;
-            --green-default: #238636;
-            --green-glow: rgba(63, 185, 80, 0.4);
+            --green-bright: #F77E2D;
+            --green-default: #c4611e;
+            --green-glow: rgba(247, 126, 45, 0.4);
             --red: #f85149;
             --red-glow: rgba(248, 81, 73, 0.4);
             --text-primary: #e6edf3;
