@@ -434,10 +434,10 @@ function generatePasswordPage(shareId) {
             --border: #30363d;
 
             /* Green phosphorescent */
-            --green-bright: #F77E2D;
-            --green-default: #c4611e;
-            --green-dim: #d46d20;
-            --green-glow: rgba(247, 126, 45, 0.4);
+            --green-bright: #3fb950;
+            --green-default: #238636;
+            --green-dim: #2ea043;
+            --green-glow: rgba(63, 185, 80, 0.4);
 
             /* Accent colors */
             --cyan: #56d4dd;
